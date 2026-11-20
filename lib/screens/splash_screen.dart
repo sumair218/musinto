@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../core/routes.dart';
 import '../core/theme.dart';
 
@@ -38,31 +39,13 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        'lib/assets/images/logo.png',
-                        height: 172,
+                      SvgPicture.asset(
+                        'lib/assets/icons/Logo.svg',
+                        key: const Key('app-logo'),
+                        width: 163,
+                        height: 240,
                         fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Musinto',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.dark,
-                          letterSpacing: 0.5,
-                          height: 1.1,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Listen to your heart.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.hint,
-                          letterSpacing: 0.4,
-                        ),
+                        semanticsLabel: 'Musinto',
                       ),
                     ],
                   ),

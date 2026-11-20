@@ -8,12 +8,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:musinto/screens/complete_profile_screen.dart';
+import 'package:musinto/screens/home_screen.dart';
+import 'package:musinto/screens/library_screen.dart';
 import 'package:musinto/screens/login_email_screen.dart';
 import 'package:musinto/screens/login_mobile_screen.dart';
 import 'package:musinto/screens/otp_screen.dart';
+import 'package:musinto/screens/language_screen.dart';
+import 'package:musinto/screens/playlist_screen.dart';
+import 'package:musinto/screens/player_screen.dart';
+import 'package:musinto/screens/splash_screen.dart';
 import 'package:musinto/core/theme.dart';
 
 void main() {
+  testWidgets('splash screen displays the SVG brand logo', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const SplashScreen()),
+    );
+
+    expect(find.byKey(const Key('app-logo')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('home screen adapts to phone, tablet, and desktop widths', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final size in const [
+      Size(360, 780),
+      Size(820, 1024),
+      Size(1440, 900),
+    ]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(),
+          home: const Scaffold(body: HomeScreen()),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull, reason: 'Viewport: $size');
+      expect(find.text('Good Morning'), findsOneWidget);
+      expect(find.text('Quick Play'), findsOneWidget);
+      expect(find.text('Daily Mix'), findsOneWidget);
+      expect(find.byType(Image), findsWidgets);
+    }
+  });
+
+  testWidgets('library and playlist show artwork responsively', (tester) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final size in const [Size(360, 780), Size(1440, 900)]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(),
+          home: const Scaffold(body: LibraryScreen()),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull, reason: 'Library viewport: $size');
+      expect(find.text('Music Library'), findsOneWidget);
+      expect(find.byType(Image), findsWidgets);
+
+      await tester.pumpWidget(
+        MaterialApp(theme: buildTheme(), home: const PlaylistScreen()),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull,
+          reason: 'Playlist viewport: $size');
+      expect(find.text('Edm House - By Unimagines'), findsOneWidget);
+      expect(find.byType(Image), findsWidgets);
+    }
+  });
+
   testWidgets('email login fits the reference phone layout', (tester) async {
     tester.view.physicalSize = const Size(470, 1010);
     tester.view.devicePixelRatio = 2;
@@ -59,6 +133,59 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('+1'), findsOneWidget);
     expect(find.text('+91'), findsNothing);
+  });
+
+  testWidgets('language screen supports multiple selections', (tester) async {
+    tester.view.physicalSize = const Size(470, 1010);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const LanguageScreen()),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Select Your Music\nLanguage'), findsOneWidget);
+    expect(find.byKey(const Key('language-option-0')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('language-option-0')));
+    await tester.pump();
+
+    final hindi = tester.widget<AnimatedContainer>(find.descendant(
+      of: find.byKey(const Key('language-option-0')),
+      matching: find.byType(AnimatedContainer),
+    ));
+    final decoration = hindi.decoration as BoxDecoration;
+    expect(decoration.border!.top.color, AppColors.pink);
+  });
+
+  testWidgets('player switches to the local rotating vinyl asset', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(470, 1010);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const PlayerScreen()),
+    );
+
+    expect(find.byKey(const Key('player-vinyl-image')), findsNothing);
+    await tester.tap(find.byKey(const Key('player-artwork')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('player-vinyl-image')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const PlayerScreen()),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('OTP verification matches the phone layout', (tester) async {

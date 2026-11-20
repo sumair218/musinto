@@ -4,7 +4,11 @@ import 'routes.dart';
 import 'theme.dart';
 
 const palette = [
-  Color(0xFF3B2BFF), Color(0xFF8E2DE2), Color(0xFFE53935), Color(0xFFFF8A00), Color(0xFF00B8D4),
+  Color(0xFF3B2BFF),
+  Color(0xFF8E2DE2),
+  Color(0xFFE53935),
+  Color(0xFFFF8A00),
+  Color(0xFF00B8D4),
 ];
 
 LinearGradient gradientFor(int seed) => LinearGradient(
@@ -20,16 +24,38 @@ class CoverArt extends StatelessWidget {
   final double? h;
   final double radius;
   final IconData icon;
+  final String? imageUrl;
   const CoverArt(this.seed,
-      {super.key, this.w = 48, this.h, this.radius = 8, this.icon = Icons.music_note});
+      {super.key,
+      this.w = 48,
+      this.h,
+      this.radius = 8,
+      this.icon = Icons.music_note,
+      this.imageUrl});
 
   @override
   Widget build(BuildContext context) => Container(
         width: w,
         height: h ?? w,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-            gradient: gradientFor(seed), borderRadius: BorderRadius.circular(radius)),
-        child: Icon(icon, color: Colors.white70, size: (h ?? (w.isFinite ? w : 80)) * .4),
+            gradient: gradientFor(seed),
+            borderRadius: BorderRadius.circular(radius)),
+        child: imageUrl == null
+            ? Icon(
+                icon,
+                color: Colors.white70,
+                size: (h ?? (w.isFinite ? w : 80)) * .4,
+              )
+            : Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  icon,
+                  color: Colors.white70,
+                  size: (h ?? (w.isFinite ? w : 80)) * .4,
+                ),
+              ),
       );
 }
 
@@ -37,19 +63,58 @@ class PosterCard extends StatelessWidget {
   final String text;
   final int seed;
   final double w, h;
-  const PosterCard(this.text, this.seed, {super.key, this.w = 116, this.h = 124});
+  final String? imageUrl;
+  const PosterCard(this.text, this.seed,
+      {super.key, this.w = 116, this.h = 124, this.imageUrl});
 
   @override
   Widget build(BuildContext context) => Container(
         width: w,
         height: h,
         margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(10),
-        alignment: Alignment.bottomLeft,
-        decoration:
-            BoxDecoration(gradient: gradientFor(seed), borderRadius: BorderRadius.circular(12)),
-        child: Text(text,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+            gradient: gradientFor(seed),
+            borderRadius: BorderRadius.circular(12)),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (imageUrl != null)
+              Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Center(
+                  child: Icon(Icons.music_note, color: Colors.white70),
+                ),
+              ),
+            if (imageUrl != null)
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Color(0xCC000000)],
+                  ),
+                ),
+              ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  text,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
 }
 
@@ -58,7 +123,8 @@ class CircleBtn extends StatelessWidget {
   final VoidCallback? onTap;
   final double size;
   final bool primary;
-  const CircleBtn(this.icon, {super.key, this.onTap, this.size = 40, this.primary = false});
+  const CircleBtn(this.icon,
+      {super.key, this.onTap, this.size = 40, this.primary = false});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -70,13 +136,20 @@ class CircleBtn extends StatelessWidget {
             shape: BoxShape.circle,
             color: primary ? null : AppColors.grey,
             gradient: primary
-                ? const LinearGradient(colors: [Color(0xFFFF5A7E), AppColors.pink])
+                ? const LinearGradient(
+                    colors: [Color(0xFFFF5A7E), AppColors.pink])
                 : null,
             boxShadow: primary
-                ? const [BoxShadow(color: Color(0x59FF2D6F), blurRadius: 14, offset: Offset(0, 6))]
+                ? const [
+                    BoxShadow(
+                        color: Color(0x59FF2D6F),
+                        blurRadius: 14,
+                        offset: Offset(0, 6))
+                  ]
                 : null,
           ),
-          child: Icon(icon, size: size * .5, color: primary ? Colors.white : AppColors.dark),
+          child: Icon(icon,
+              size: size * .5, color: primary ? Colors.white : AppColors.dark),
         ),
       );
 }
@@ -92,8 +165,10 @@ class PlayOutline extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-              shape: BoxShape.circle, border: Border.all(color: const Color(0xFFFFD0DC))),
-          child: const Icon(Icons.play_arrow_outlined, size: 18, color: AppColors.pink),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFFFD0DC))),
+          child: const Icon(Icons.play_arrow_outlined,
+              size: 18, color: AppColors.pink),
         ),
       );
 }
@@ -106,7 +181,12 @@ class SongTile extends StatelessWidget {
   final double? artH;
   final bool showMeta;
   const SongTile(this.s,
-      {super.key, this.onTap, this.trailing, this.art = 48, this.artH, this.showMeta = true});
+      {super.key,
+      this.onTap,
+      this.trailing,
+      this.art = 48,
+      this.artH,
+      this.showMeta = true});
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -114,23 +194,28 @@ class SongTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(children: [
-            CoverArt(s.seed, w: art, h: artH),
+            CoverArt(s.seed, w: art, h: artH, imageUrl: s.artworkUrl),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(s.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 3),
-                Text(s.artists,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10, color: AppColors.hint)),
-                if (showMeta && s.meta.isNotEmpty)
-                  Text(s.meta,
-                      style: const TextStyle(fontSize: 10, color: AppColors.hint)),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(s.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 3),
+                    Text(s.artists,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 10, color: AppColors.hint)),
+                    if (showMeta && s.meta.isNotEmpty)
+                      Text(s.meta,
+                          style: const TextStyle(
+                              fontSize: 10, color: AppColors.hint)),
+                  ]),
             ),
             const SizedBox(width: 8),
             trailing ?? PlayOutline(onTap: onTap),
@@ -153,7 +238,8 @@ class SectionHeader extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
               child: Text(title,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w600))),
           if (onViewAll != null)
             GestureDetector(
                 onTap: onViewAll,
@@ -181,7 +267,8 @@ class TopBar extends StatelessWidget {
   Widget build(BuildContext context) => Row(children: [
         CircleBtn(Icons.chevron_left, onTap: () => Navigator.maybePop(context)),
         const Spacer(),
-        for (final a in actions) Padding(padding: const EdgeInsets.only(left: 10), child: a),
+        for (final a in actions)
+          Padding(padding: const EdgeInsets.only(left: 10), child: a),
       ]);
 }
 
@@ -190,7 +277,8 @@ class UnderlineTabs extends StatelessWidget {
   final List<IconData> icons;
   final int index;
   final ValueChanged<int> onChanged;
-  const UnderlineTabs(this.labels, this.icons, this.index, this.onChanged, {super.key});
+  const UnderlineTabs(this.labels, this.icons, this.index, this.onChanged,
+      {super.key});
 
   @override
   Widget build(BuildContext context) => Row(
@@ -205,12 +293,16 @@ class UnderlineTabs extends StatelessWidget {
                 decoration: BoxDecoration(
                     border: Border(
                         bottom: BorderSide(
-                            color: sel ? AppColors.pink : AppColors.grey, width: sel ? 2 : 1))),
-                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(icons[i], size: 16, color: sel ? AppColors.pink : AppColors.hint),
+                            color: sel ? AppColors.pink : AppColors.grey,
+                            width: sel ? 2 : 1))),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(icons[i],
+                      size: 16, color: sel ? AppColors.pink : AppColors.hint),
                   const SizedBox(width: 6),
                   Text(labels[i],
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w500)),
                 ]),
               ),
             ),
@@ -224,7 +316,8 @@ class PillChip extends StatelessWidget {
   final IconData icon;
   final bool selected;
   final VoidCallback? onTap;
-  const PillChip(this.label, this.icon, {super.key, this.selected = false, this.onTap});
+  const PillChip(this.label, this.icon,
+      {super.key, this.selected = false, this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -235,12 +328,16 @@ class PillChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected ? const Color(0xFFFFF1F5) : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: selected ? AppColors.pink : const Color(0xFFE6E6E6)),
+            border: Border.all(
+                color: selected ? AppColors.pink : const Color(0xFFE6E6E6)),
           ),
           child: Row(children: [
-            Icon(icon, size: 16, color: selected ? AppColors.pink : AppColors.hint),
+            Icon(icon,
+                size: 16, color: selected ? AppColors.pink : AppColors.hint),
             const SizedBox(width: 8),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+            Text(label,
+                style:
+                    const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
           ]),
         ),
       );
@@ -250,13 +347,22 @@ class ArtistAvatar extends StatelessWidget {
   final int seed;
   final String name;
   final double size;
-  const ArtistAvatar(this.seed, this.name, {super.key, this.size = 76});
+  final String? imageUrl;
+  const ArtistAvatar(this.seed, this.name,
+      {super.key, this.size = 76, this.imageUrl});
 
   @override
   Widget build(BuildContext context) => SizedBox(
         width: size + 10,
         child: Column(children: [
-          ClipOval(child: CoverArt(seed, w: size, icon: Icons.person)),
+          ClipOval(
+            child: CoverArt(
+              seed,
+              w: size,
+              icon: Icons.person,
+              imageUrl: imageUrl,
+            ),
+          ),
           const SizedBox(height: 6),
           Text(name,
               maxLines: 1,
@@ -278,25 +384,30 @@ class MiniPlayer extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
-            boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 14)],
+            boxShadow: const [
+              BoxShadow(color: Color(0x1A000000), blurRadius: 14)
+            ],
           ),
           child: Row(children: [
             const ClipOval(child: CoverArt(2, w: 44, icon: Icons.person)),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Saul Mate - By...',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: const LinearProgressIndicator(
-                      value: .25,
-                      minHeight: 4,
-                      color: AppColors.pink,
-                      backgroundColor: AppColors.grey),
-                ),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Saul Mate - By...',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: const LinearProgressIndicator(
+                          value: .25,
+                          minHeight: 4,
+                          color: AppColors.pink,
+                          backgroundColor: AppColors.grey),
+                    ),
+                  ]),
             ),
             const SizedBox(width: 10),
             const CircleBtn(Icons.skip_next_outlined, size: 38),
@@ -334,24 +445,36 @@ class _PlayerControlsState extends State<PlayerControls> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Text(_fmt(_pos), style: const TextStyle(fontSize: 10)),
             Text(_fmt(_total), style: const TextStyle(fontSize: 10)),
           ]),
         ),
         const SizedBox(height: 14),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const CircleBtn(Icons.shuffle),
-          const CircleBtn(Icons.skip_previous_outlined),
-          CircleBtn(_playing ? Icons.pause : Icons.play_arrow,
-              size: 64,
-              primary: true,
-              onTap: () {
-                setState(() => _playing = !_playing);
-                widget.onPlayChanged?.call(_playing);
-              }),
-          const CircleBtn(Icons.skip_next_outlined),
-          const CircleBtn(Icons.queue_music),
-        ]),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 350;
+            final buttonSize = compact ? 32.0 : 40.0;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CircleBtn(Icons.shuffle, size: buttonSize),
+                CircleBtn(Icons.skip_previous_outlined, size: buttonSize),
+                CircleBtn(
+                  _playing ? Icons.pause : Icons.play_arrow,
+                  size: compact ? 52 : 64,
+                  primary: true,
+                  onTap: () {
+                    setState(() => _playing = !_playing);
+                    widget.onPlayChanged?.call(_playing);
+                  },
+                ),
+                CircleBtn(Icons.skip_next_outlined, size: buttonSize),
+                CircleBtn(Icons.queue_music, size: buttonSize),
+              ],
+            );
+          },
+        ),
       ]);
 }

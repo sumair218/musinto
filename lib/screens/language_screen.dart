@@ -10,7 +10,14 @@ class LanguageScreen extends StatefulWidget {
 }
 
 class _LanguageScreenState extends State<LanguageScreen> {
-  static const _languages = ['Hindi', 'English', 'Gujarati', 'Punjabi', 'Marathi', 'Tamil / Telugu'];
+  static const _languages = [
+    'Hindi',
+    'English',
+    'Gujarati',
+    'Punjabi',
+    'Marathi',
+    'Tamil /\nTelugu',
+  ];
   static const _assets = [
     'lib/assets/images/Hindi_Singer.png',
     'lib/assets/images/English_Singer.png',
@@ -19,72 +26,115 @@ class _LanguageScreenState extends State<LanguageScreen> {
     'lib/assets/images/Marathi_singer.png',
     'lib/assets/images/Tealgu_Singer.png',
   ];
-  int _selected = 2;
+  final Set<int> _selected = {2};
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               GestureDetector(
                 onTap: () => Navigator.maybePop(context),
                 child: const CircleAvatar(
-                  radius: 17,
+                  key: Key('language-close'),
+                  radius: 22,
                   backgroundColor: AppColors.grey,
-                  child: Icon(Icons.close, size: 16, color: AppColors.dark),
+                  child: Icon(Icons.close, size: 20, color: AppColors.dark),
                 ),
               ),
-              const SizedBox(height: 28),
-              const Text('Select Your Music\nLanguage',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, height: 1.3)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 34),
+              const Text(
+                'Select Your Music\nLanguage',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  height: 1.18,
+                ),
+              ),
+              const SizedBox(height: 38),
               Expanded(
                 child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: _languages.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 2.4,
+                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 14,
+                    childAspectRatio: 2.18,
                   ),
                   itemBuilder: (_, i) => _tile(i),
                 ),
               ),
               AppButton(
                 label: 'Continue',
-                onTap: () => Navigator.pushNamedAndRemoveUntil(context, Routes.main, (_) => false),
+                height: 58,
+                borderRadius: 18,
+                fontSize: 16,
+                onTap: () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  Routes.main,
+                  (_) => false,
+                ),
               ),
-            ]),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _tile(int i) {
-    final selected = i == _selected;
+    final selected = _selected.contains(i);
     return GestureDetector(
-      onTap: () => setState(() => _selected = i),
-      child: Container(
-        padding: const EdgeInsets.only(left: 12),
+      key: Key('language-option-$i'),
+      onTap: () => setState(() {
+        if (selected) {
+          _selected.remove(i);
+        } else {
+          _selected.add(i);
+        }
+      }),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
         decoration: BoxDecoration(
           color: selected ? const Color(0xFFFFEEF3) : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: selected ? AppColors.pink : const Color(0xFFE6E6E6)),
-        ),
-        child: Row(children: [
-          Expanded(
-              child: Text(_languages[i],
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500))),
-          ClipOval(
-            child: Image.asset(
-              _assets[i],
-              width: 28,
-              height: 28,
-              fit: BoxFit.cover,
-            ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? AppColors.pink : const Color(0xFFDADADD),
+            width: selected ? 1.5 : 1,
           ),
-          const SizedBox(width: 8),
-        ]),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Text(
+                  _languages[i],
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    height: 1.15,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 76,
+              height: double.infinity,
+              child: Image.asset(
+                _assets[i],
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
