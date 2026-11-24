@@ -13,6 +13,7 @@ import '../screens/login_mobile_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/otp_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/ai_mix_screen.dart';
 
 class Routes {
   static const splash = '/';
@@ -29,6 +30,7 @@ class Routes {
   static const podcastDetails = '/podcast-details';
   static const podcastPlayer = '/podcast-player';
   static const liked = '/liked';
+  static const aiMix = '/ai-mix';
 
   static final Map<String, WidgetBuilder> table = {
     splash: (_) => const SplashScreen(),
@@ -45,5 +47,6 @@ class Routes {
     podcastDetails: (_) => const PodcastDetailsScreen(),
     podcastPlayer: (_) => const PodcastPlayerScreen(),
     liked: (_) => const LikedSongsScreen(),
+    aiMix: (_) => const AiMixScreen(),
   };
 }

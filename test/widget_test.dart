@@ -16,7 +16,13 @@ import 'package:musinto/screens/otp_screen.dart';
 import 'package:musinto/screens/language_screen.dart';
 import 'package:musinto/screens/playlist_screen.dart';
 import 'package:musinto/screens/player_screen.dart';
+import 'package:musinto/screens/podcast_details_screen.dart';
+import 'package:musinto/screens/podcast_player_screen.dart';
+import 'package:musinto/screens/podcasts_screen.dart';
+import 'package:musinto/screens/profile_screen.dart';
+import 'package:musinto/screens/search_screen.dart';
 import 'package:musinto/screens/splash_screen.dart';
+import 'package:musinto/screens/ai_mix_screen.dart';
 import 'package:musinto/core/theme.dart';
 
 void main() {
@@ -123,7 +129,7 @@ void main() {
     expect(find.text('Enter Mobile Number'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('country-selector')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(TextField), findsNWidgets(2));
 
     await tester.enterText(find.byType(TextField).last, 'Canada');
@@ -185,6 +191,104 @@ void main() {
       MaterialApp(theme: buildTheme(), home: const PlayerScreen()),
     );
     await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    expect(find.byKey(const Key('player-circular-art')), findsNothing);
+    expect(find.byKey(const Key('player-vinyl-image')), findsOneWidget);
+  });
+
+  testWidgets('search filters music and profile exposes library actions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(470, 1010);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const SearchScreen()),
+    );
+
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Browse All'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('search-field')),
+      'Saturday',
+    );
+    await tester.pump();
+
+    expect(find.text('Saturday - Kelly Clen'), findsOneWidget);
+    expect(find.text('Browse All'), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const ProfileScreen()),
+    );
+    await tester.pump();
+
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Liked Songs'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Music Language'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pump();
+    expect(find.text('Music Language'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AI Mix creates a mood playlist', (tester) async {
+    tester.view.physicalSize = const Size(470, 1010);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const AiMixScreen()),
+    );
+
+    expect(find.text('Welcome to'), findsOneWidget);
+    expect(find.text('Party'), findsOneWidget);
+    await tester.tap(find.text('Party'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('ai-mix-prompt')));
+    await tester.enterText(
+      find.byKey(const Key('ai-mix-prompt')),
+      'Upbeat party songs',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
+    expect(find.text('Ai Party Mix'), findsOneWidget);
+    expect(find.text('25+ Songs'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('podcast feed, details, and player render', (tester) async {
+    tester.view.physicalSize = const Size(470, 1010);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const PodcastsScreen()),
+    );
+    expect(find.text('Podcasts'), findsOneWidget);
+    expect(find.text("Lilly's Life"), findsWidgets);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const PodcastDetailsScreen()),
+    );
+    expect(find.text("Lilly's Life - Podcast"), findsOneWidget);
+    expect(find.text('Follow'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: buildTheme(), home: const PodcastPlayerScreen()),
+    );
+    expect(find.text('Saul Mate - By Emmy Stark'), findsOneWidget);
+    expect(find.text('Up - Next'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

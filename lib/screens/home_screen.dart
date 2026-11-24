@@ -98,7 +98,8 @@ class HomeScreen extends StatelessWidget {
                             border: Border.all(color: const Color(0xFFFFD1D8)),
                           ),
                           child: TextButton.icon(
-                            onPressed: () {},
+                            onPressed: () =>
+                                Navigator.pushNamed(context, Routes.aiMix),
                             icon: const Icon(Icons.auto_awesome,
                                 size: 17, color: AppColors.pink),
                             label: const Text(

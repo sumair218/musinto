@@ -4,6 +4,8 @@ import '../core/ui.dart';
 import 'home_screen.dart';
 import 'library_screen.dart';
 import 'podcasts_screen.dart';
+import 'profile_screen.dart';
+import 'search_screen.dart';
 
 /// Bottom-navigation host with the persistent mini player.
 class MainShell extends StatefulWidget {
@@ -30,9 +32,9 @@ class _MainShellState extends State<MainShell> {
             child: IndexedStack(index: _index, children: const [
               HomeScreen(),
               PodcastsScreen(),
-              Center(child: Text('Search')), // TODO: search screen
+              SearchScreen(),
               LibraryScreen(),
-              Center(child: Text('Profile')), // TODO: profile screen
+              ProfileScreen(),
             ]),
           ),
           if (_index != 2 && _index != 4)
